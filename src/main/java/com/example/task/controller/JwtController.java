@@ -35,8 +35,6 @@ public class JwtController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    public JwtController() {
-    }
 
 
     @RequestMapping(value = "/token", method = RequestMethod.POST)

@@ -14,20 +14,12 @@ import org.springframework.test.context.ContextConfiguration;
 import java.time.LocalDate;
 import java.util.Optional;
 
-
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {StudentService.class})
 @ExtendWith(MockitoExtension.class)
@@ -102,32 +94,6 @@ class StudentServiceTest {
         verify(studentRepository, never()).save(any());
     }
 
-    @Test
-    void testAddNewStudent() {
-        Student student = new Student();
-        student.setAge(1);
-        student.setDob(LocalDate.ofEpochDay(1L));
-        student.setEmail("jane.doe@example.org");
-        student.setId(123L);
-        student.setName("Name");
-        when(studentRepository.save((Student) org.mockito.Mockito.any())).thenReturn(student);
-        when(studentRepository.findStudentByEmail((String) org.mockito.Mockito.any())).thenReturn(Optional.empty());
-
-        Student student1 = new Student();
-        student1.setAge(1);
-        student1.setDob(LocalDate.ofEpochDay(1L));
-        student1.setEmail("jane.doe@example.org");
-        student1.setId(123L);
-        student1.setName("Name");
-        studentService.addNewStudent(student1);
-        verify(studentRepository).save((Student) org.mockito.Mockito.any());
-        verify(studentRepository).findStudentByEmail((String) org.mockito.Mockito.any());
-        assertEquals("Name", student1.getName());
-        assertEquals(123L, student1.getId().longValue());
-        assertEquals("jane.doe@example.org", student1.getEmail());
-        assertEquals("1970-01-02", student1.getDob().toString());
-        assertTrue(studentService.getStudents().isEmpty());
-    }
 
     @Test
     void testDeleteStudent() {
@@ -147,4 +113,58 @@ class StudentServiceTest {
         verify(studentRepository).deleteById((Long) org.mockito.Mockito.any());
         assertTrue(studentService.getStudents().isEmpty());
     }
+
+    @Test
+    void testUpdateStudent() {
+        Student student = new Student();
+        student.setAge(1);
+        student.setDob(LocalDate.ofEpochDay(1L));
+        student.setEmail("jane.doe@example.org");
+        student.setId(123L);
+        student.setName("Name");
+        Optional<Student> ofResult = Optional.of(student);
+        when(studentRepository.findById((Long) org.mockito.Mockito.any())).thenReturn(ofResult);
+        studentService.updateStudent(123L, "Name", "jane.doe@example.org");
+        verify(studentRepository).findById((Long) org.mockito.Mockito.any());
+        assertTrue(studentService.getStudents().isEmpty());
+    }
+
+    @Test
+    void testUpdateStudent2() {
+        Student student = mock(Student.class);
+        when(student.getEmail()).thenReturn("foo");
+        when(student.getName()).thenReturn("Name");
+        doNothing().when(student).setAge((Integer) org.mockito.Mockito.any());
+        doNothing().when(student).setDob((LocalDate) org.mockito.Mockito.any());
+        doNothing().when(student).setEmail((String) org.mockito.Mockito.any());
+        doNothing().when(student).setId((Long) org.mockito.Mockito.any());
+        doNothing().when(student).setName((String) org.mockito.Mockito.any());
+        student.setAge(1);
+        student.setDob(LocalDate.ofEpochDay(1L));
+        student.setEmail("jane.doe@example.org");
+        student.setId(123L);
+        student.setName("Name");
+        Optional<Student> ofResult = Optional.of(student);
+
+        Student student1 = new Student();
+        student1.setAge(1);
+        student1.setDob(LocalDate.ofEpochDay(1L));
+        student1.setEmail("jane.doe@example.org");
+        student1.setId(123L);
+        student1.setName("Name");
+        Optional<Student> ofResult1 = Optional.of(student1);
+        when(studentRepository.findStudentByEmail((String) org.mockito.Mockito.any())).thenReturn(ofResult1);
+        when(studentRepository.findById((Long) org.mockito.Mockito.any())).thenReturn(ofResult);
+        assertThrows(IllegalStateException.class, () -> studentService.updateStudent(123L, "Name", "jane.doe@example.org"));
+        verify(studentRepository).findStudentByEmail((String) org.mockito.Mockito.any());
+        verify(studentRepository).findById((Long) org.mockito.Mockito.any());
+        verify(student).getEmail();
+        verify(student).getName();
+        verify(student).setAge((Integer) org.mockito.Mockito.any());
+        verify(student).setDob((LocalDate) org.mockito.Mockito.any());
+        verify(student).setEmail((String) org.mockito.Mockito.any());
+        verify(student).setId((Long) org.mockito.Mockito.any());
+        verify(student).setName((String) org.mockito.Mockito.any());
+    }
+
 }

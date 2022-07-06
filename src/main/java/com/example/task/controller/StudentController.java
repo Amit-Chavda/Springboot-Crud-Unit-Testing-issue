@@ -1,12 +1,11 @@
 package com.example.task.controller;
 
 
-import com.example.task.service.StudentService;
 import com.example.task.model.Student;
+import com.example.task.service.StudentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,11 +14,12 @@ import java.util.List;
 @RequestMapping(path = "/student")
 public class StudentController {
 
-    private final StudentService student_service;
+    @Autowired
+    private StudentService student_service;
 
     private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(StudentController.class);
 
-    @Autowired
+
     public StudentController(StudentService student_service) {
         this.student_service = student_service;
     }
