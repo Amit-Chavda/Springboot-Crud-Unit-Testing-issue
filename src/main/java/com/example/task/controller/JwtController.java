@@ -38,7 +38,7 @@ public class JwtController {
 
 
     @RequestMapping(value = "/token", method = RequestMethod.POST)
-    public ResponseEntity<?> generateToken(@RequestBody JwtRequest jwtRequest) throws Exception {
+    public ResponseEntity<JwtResponse> generateToken(@RequestBody JwtRequest jwtRequest) throws Exception {
 
         try {
             this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(jwtRequest.getUsername(), jwtRequest.getPassword()));

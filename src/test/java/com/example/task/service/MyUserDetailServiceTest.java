@@ -26,11 +26,11 @@ class MyUserDetailServiceTest {
     @Test
     void testLoadUserByUsername() throws UsernameNotFoundException {
         User user = new User();
-        user.setId(123L);
-        user.setPassword("iloveyou");
-        user.setUsername("janedoe");
+        user.setId(1L);
+        user.setPassword("root");
+        user.setUsername("root");
         when(userRepository.findByUsername((String) any())).thenReturn(user);
-        assertEquals("janedoe", myUserDetailService.loadUserByUsername("janedoe").getUsername());
+        assertEquals("root", myUserDetailService.loadUserByUsername("root").getUsername());
         verify(userRepository).findByUsername((String) any());
     }
 
