@@ -2,71 +2,66 @@ package com.example.task.controller;
 
 import com.example.task.helper.JwtUtil;
 import com.example.task.model.User;
+import com.example.task.repo.UserRepository;
 import com.example.task.service.MyUserDetailService;
-import com.example.task.service.UserDetailsImplement;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ExtendWith(MockitoExtension.class)
 class JwtControllerTest {
 
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @Autowired
     private JwtController jwtController;
 
-    @MockBean
+    @Autowired
     private MyUserDetailService myUserDetailService;
 
-    @MockBean
+    @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     public void testGenerateToken() throws Exception {
 
-        String username = "user";
-        String password = "pass";
+        System.out.println(new BCryptPasswordEncoder().encode("123456"));
 
-//        JwtRequest jwtRequest = new JwtRequest(username, password);
+        String username = "tony";
+        String password = "123456";
+
         User user = new User();
         user.setUsername(username);
         user.setPassword(password);
 
-        UserDetailsImplement userDetailsImplement = new UserDetailsImplement(user);
-        when(myUserDetailService.loadUserByUsername(any())).thenReturn(userDetailsImplement);
-        when(jwtUtil.generateToken(userDetailsImplement)).thenReturn("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjU3NTIyNDM2LCJpYXQiOjE2NTc1MjIzMTZ9.KPBPtqv9ZNUswDyhiDEUvqU6JPoI1nM0z9c2jKhHKCs");
         String body = "{\"username\":\"" + username + "\", \"password\":\"" + password + "\"}";
 
-        MvcResult result = mvc.perform(MockMvcRequestBuilders.post("/token")
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
-                        .content(body)).andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk()).andReturn();
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(body);
 
-        String response = result.getResponse().getContentAsString();
-        System.out.println(response + "1");
-        response = response.replace("{\"access_token\": \"", "");
-        String token = response.replace("\"}", "");
-//
-        System.out.println(token);
-//
-//        mvc.perform(MockMvcRequestBuilders.get("/test")
-//                        .header("Authorization", "Bearer " + token))
-//                .andExpect(status().isOk());
+        MvcResult mvcResult = mvc.perform(requestBuilder)
+                .andDo(MockMvcResultHandlers.print()).andReturn();
 
+        Assertions.assertNotNull(mvcResult.getResponse().getContentAsString());
     }
 }
 
